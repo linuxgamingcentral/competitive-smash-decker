@@ -33,7 +33,7 @@ Please run [EmuDeck](https://www.emudeck.com/) first to get the necessary emulat
 
 Slippi, Project+, and PMEX Remix already come with their own AppImage.
 
-If you're on Steam Deck, download the [desktop file]() (right-click, save link as) and save it to your desktop. Double-click or tap the file to download and run the script.
+If you're on Steam Deck, download the [desktop file](https://raw.githubusercontent.com/linuxgamingcentral/competitive-smash-decker/main/competitive-smash-decker.desktop) (right-click, save link as) and save it to your desktop. Double-click or tap the file to download and run the script.
 
 Other distros can run the script with:
 
