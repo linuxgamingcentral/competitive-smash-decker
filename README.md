@@ -37,9 +37,7 @@ If you're on Steam Deck, download the [desktop file](https://raw.githubuserconte
 
 Other distros can run the script with:
 
-```
-curl -L https://raw.githubusercontent.com/linuxgamingcentral/competitive-smash-decker/main/competitive-smash-decker.sh | sh
-```
+`curl -L https://raw.githubusercontent.com/linuxgamingcentral/competitive-smash-decker/main/competitive-smash-decker.sh | sh`
 
 The script will look for ROMs/ISOs in `~/Emulation/roms/`:
 - Smash 64: `n64/smash64.z64`
