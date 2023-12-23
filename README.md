@@ -27,18 +27,18 @@ By the time the project is complete I'm hoping to be able to do the following:
 ## How to Use
 Be aware this repository does NOT contain any copyrighted assets. You must provide your own legally-dumped copies of your ROMs/ISOs.
 
-1. Please run [EmuDeck](https://www.emudeck.com/) first to get the necessary emulators installed. Emulators you'll want to install, if they're not installed already, include:
+Please run [EmuDeck](https://www.emudeck.com/) first to get the necessary emulators installed. Emulators you'll want to install, if they're not installed already, include:
 - Mupen64 (N64)
 - Ryujinx (Switch)
 
 Slippi, Project+, and PMEX Remix already come with their own AppImage.
 
-2. If you're on Steam Deck, download the [desktop file]() (right-click, save link as) and save it to your desktop. Double-click or tap the file to download and run the script.
+If you're on Steam Deck, download the [desktop file]() (right-click, save link as) and save it to your desktop. Double-click or tap the file to download and run the script.
 
 Other distros can run the script with:
 
 ```
-curl -L 
+curl -L https://raw.githubusercontent.com/linuxgamingcentral/competitive-smash-decker/main/competitive-smash-decker.sh | sh
 ```
 
 The script will look for ROMs/ISOs in `~/Emulation/roms/`:
@@ -48,3 +48,5 @@ The script will look for ROMs/ISOs in `~/Emulation/roms/`:
 - HDR: `switch/ssbu.nsp`
 
 If the script can't detect these ROMs, certain functions in the script won't work.
+
+After your ROMs have been patched, they'll show up in `~/Emulation/roms/<system>/`. From here you can run Steam ROM Manager with EmuDeck to add your mods as non-Steam shortcuts.
