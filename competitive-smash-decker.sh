@@ -118,6 +118,20 @@ pmex_menu() {
 	TRUE Exit "Exit this submenu"
 }
 
+hdr_menu() {
+	zen_nospam --width 700 --height 350 --list --radiolist --multiple --title "$title"\
+	--column ""\
+	--column "Option"\
+	--column="Description"\
+	FALSE Download "Download or update HDR"\
+	FALSE Get_Netplay "Download Ryujinx LDN build (your web browser will open)"\
+	FALSE Configure "Configure Ryujinx (video settings, DLC/update management, etc.)"\
+	FALSE Configure_Netplay "Configure Ryujinx LDN build"\
+	FALSE Offline "Launch HDR without netplay"\
+	FALSE Netplay "Launch HDR with netplay"\
+	TRUE Exit "Exit this submenu"
+}
+
 # functions
 get_sudo_password() {
 	sudo_password=$(zen_nospam --password --title="$title")
@@ -246,11 +260,11 @@ Choice=$(main_menu)
 			elif [ "$Choice" == "Play" ]; then
 				# install the Mupen64 GUI flatpak if it isn't detected
 				if ! [ -d $HOME/.var/app/com.github.Rosalie241.RMG ]; then
-					flatpak install flathub com.github.Rosalie241.RMG -y
+					error "Mupen64 not found. Please install it as a Flatpak and run it at least once."
+				else
+					# just run the emulator itself for now, can't figure out how to get the ROM to launch directly
+					flatpak run com.github.Rosalie241.RMG	
 				fi
-				
-				# just run the emulator itself for now, can't figure out how to get the ROM to launch directly
-				flatpak run com.github.Rosalie241.RMG
 			fi
 		done
 	
@@ -457,13 +471,98 @@ Choice=$(main_menu)
 			fi
 		done	
 	
+	elif [ "$Choice" == "HDR" ]; then
+		
+		while true; do
+		Choice=$(hdr_menu)
+			if [ $? -eq 1 ] || [ "$Choice" == "Exit" ]; then
+				break
+			
+			elif [ "$Choice" == "Download" ]; then
+				mkdir -p HDR
+				
+				if ! [ -d $HOME/.var/app/org.ryujinx.Ryujinx ]; then
+					error "Ryujinx not found, please install it as a Flatpak and run it at least once."
+				else
+				(
+					echo "20"
+					echo "# Downloading..."
+					DOWNLOAD_URL=$(curl -s https://api.github.com/repos/HDR-Development/HDR-Releases/releases/latest \
+						| grep "browser_download_url" \
+						| grep ryujinx-package.zip \
+						| cut -d '"' -f 4)
+					curl -L "$DOWNLOAD_URL" -o HDR/hdr.zip
+					
+					echo "50"
+					echo "# Extracting..."
+					unzip -o -q HDR/hdr.zip -d HDR
+					
+					echo "70"
+					echo "# Copying..."
+					cp -r HDR/sdcard $HOME/.var/app/org.ryujinx.Ryujinx/config/Ryujinx/
+					
+					# We need to update ARCropolis, since the current version shipped with HDR won't work...
+					echo "85"
+					echo "# Updating ARCropolis..."
+					curl -L https://github.com/Raytwo/ARCropolis/releases/download/v4.0.0/release.zip -o HDR/arcropolis.zip
+					unzip -o HDR/arcropolis.zip -d $HOME/.var/app/org.ryujinx.Ryujinx/config/Ryujinx/sdcard/
+					
+					echo "95"
+					echo "# Cleaning up..."
+					rm HDR/hdr.zip HDR/arcropolis.zip
+					) | progress_bar ""
+					
+					info "HDR successfully downloaded and installed!"
+				fi
+				
+			elif [ "$Choice" == "Get_Netplay" ]; then
+				info "Your web browser will open. Download the Linux version of the LDN build, then extract it to $HOME/Applications/HDR/."
+				xdg-open https://www.patreon.com/posts/74910544
+				
+				info "Note you will need to put prod.keys in $HOME/.config/Ryujinx/system/, install system FW, install updates and DLC, and copy your save data over."
+			
+			elif [ "$Choice" == "Configure" ]; then
+				if ! [ -d $HOME/.var/app/org.ryujinx.Ryujinx ]; then
+					error "Ryujinx not found, please install it as a Flatpak and run it at least once."
+				else			
+					flatpak run org.ryujinx.Ryujinx
+				fi
+		
+			elif [ "$Choice" == "Configure_Netplay" ]; then
+				if ! [ -f HDR/publish/Ryujinx ]; then
+					error "Ryujinx LDN build not found."
+				else			
+					HDR/publish/./Ryujinx
+				fi
+				
+			elif [ "$Choice" == "Offline" ]; then
+				if ! [ -f $HOME/Emulation/roms/switch/ssbu.nsp ]; then
+					error "SSBU dump not found. Please place it in $HOME/Emulation/roms/switch/ and name it to ssbu.nsp"
+				else
+					flatpak run org.ryujinx.Ryujinx $HOME/Emulation/roms/switch/ssbu.nsp
+				fi
+			
+			elif [ "$Choice" == "Netplay" ]; then
+				if ! [ -f HDR/publish/Ryujinx ]; then
+					error "Ryujinx LDN build not found."
+				else
+					if ! [ -f $HOME/Emulation/roms/switch/ssbu.nsp ]; then
+						error "SSBU dump not found. Please place it in $HOME/Emulation/roms/switch/ and name it to ssbu.nsp"
+					else
+						HDR/publish/./Ryujinx $HOME/Emulation/roms/switch/ssbu.nsp
+					fi
+				fi
+			
+			fi
+		done
+	
 	elif [ "$Choice" == "Overclock" ]; then
 		
 		if [ -f "/usr/lib/modules/$(uname -r)/extra/gcadapter_oc.ko" ]; then
 			if ( question "Overclocking module already exists. Would you like to uninstall?" ); then
 			yes |
 				get_sudo_password
-				(
+				
 				if [ $USER == "deck" ]; then
 					sudo -Sp '' steamos-readonly disable <<<${sudo_password}
 					undo_overclock
@@ -471,13 +570,12 @@ Choice=$(main_menu)
 				else
 					undo_overclock <<<${sudo_password}
 				fi
-				) | progress_bar "Uninstalling, please wait..."
 
 				info "Uninstallation complete!"
 			fi
 		else
 			get_sudo_password
-			(
+			
 			if [ $USER == "deck" ]; then
 				# Disable the filesystem until we're done
 				sudo -Sp '' steamos-readonly disable <<<${sudo_password}
@@ -496,7 +594,6 @@ Choice=$(main_menu)
 			else
 				overclock <<<${sudo_password}
 			fi
-			) | progress_bar "Overclocking GCC adapter, please wait..."
 
 			info "Installation complete!"
 		fi
