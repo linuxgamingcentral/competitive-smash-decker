@@ -1,7 +1,9 @@
 # Competitive Smash Decker
-The goal of this project is to be the ultimate Swiss army knife for all things *Smash* on Steam Deck/Linux. Easily download and install Smash 64 Remix, Slippi, Project+, Project M EX Remix, and HewDraw Remix. You can also overclock your GameCube controller adapter, provided that you have a sudo password.
+The goal of this project is to be the ultimate Swiss army knife for all things *Smash* on Steam Deck/Linux. Easily download, update, and install Smash 64 Remix, Slippi, Project+, Project M EX Remix, and HewDraw Remix. You can also overclock your GameCube controller adapter, provided that you have a sudo password.
 
 That being said, there will still need to be a little bit of legwork needed on your part -- at least during the initial couple of steps -- which is detailed below.
+
+![Steam Deck](https://i.imgur.com/xELGiPb.jpg)
 
 ## What Currently Works
 - [Smash 64 Remix](https://github.com/JSsixtyfour/smashremix)
@@ -30,6 +32,8 @@ That being said, there will still need to be a little bit of legwork needed on y
   - launch HDR directly with or without netplay
 - overclocking the GCC adapter
   - if the overclock module already exists you have the option to uninstall
+  
+![Script main menu](https://i.imgur.com/pQ8YHov.png)
 
 ## How to Use
 This repository does NOT contain any copyrighted assets. You must provide your own legally-dumped copies of your ROMs/ISOs.
@@ -64,7 +68,7 @@ Other distros can run the script with:
 
 `curl -L https://raw.githubusercontent.com/linuxgamingcentral/competitive-smash-decker/main/competitive-smash-decker.sh | sh`
 
-Smash 64 Remix and HDR can be added as non-Steam shortcuts with Steam ROM Manager -- included with EmuDeck. Slippi, Project+, and PMEX Remix will need to be manually added to Steam at the moment.
+Mods are downloaded to `~/Applications/`. Smash 64 Remix and HDR can be added as non-Steam shortcuts with Steam ROM Manager -- included with EmuDeck. Slippi and Project+/PMEX Remix will need to be manually added to Steam at the moment.
 
 ## Things to be Aware of
 While this script tries to make things as simple as possible for the end-user, there are some parts of the script where there will need to be manual intervention. As an example, some mods are uploaded in some sketchy places (Mediafire, Google Drive, etc.). As a result, it makes downloading these mods through the terminal a bit of a pain. Patching your Melee ISO with Animelee or Diet Melee will currently require you to manually download the mod and apply the patch yourself. Downloading PMEX Remix will require you to open up the download link in your web browser. If I get the developers' permission I might just upload these mods to my own server to make downloading/patching mods a bit easier.
