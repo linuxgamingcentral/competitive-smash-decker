@@ -481,8 +481,8 @@ Choice=$(main_menu)
 			elif [ "$Choice" == "Download" ]; then
 				mkdir -p HDR
 				
-				if ! [ -d $HOME/.var/app/org.ryujinx.Ryujinx ]; then
-					error "Ryujinx not found, please install it as a Flatpak and run it at least once."
+				if ! [ -f $HOME/Applications/publish/Ryujinx ]; then
+					error "Ryujinx not found, please install it via EmuDeck and run it at least once."
 				else
 				(
 					echo "20"
@@ -499,13 +499,13 @@ Choice=$(main_menu)
 					
 					echo "70"
 					echo "# Copying..."
-					cp -r HDR/sdcard $HOME/.var/app/org.ryujinx.Ryujinx/config/Ryujinx/
+					cp -r HDR/sdcard $HOME/.config/Ryujinx/
 					
 					# We need to update ARCropolis, since the current version shipped with HDR won't work...
 					echo "85"
 					echo "# Updating ARCropolis..."
 					curl -L https://github.com/Raytwo/ARCropolis/releases/download/v4.0.0/release.zip -o HDR/arcropolis.zip
-					unzip -o HDR/arcropolis.zip -d $HOME/.var/app/org.ryujinx.Ryujinx/config/Ryujinx/sdcard/
+					unzip -o HDR/arcropolis.zip -d $HOME/.config/Ryujinx/sdcard/
 					
 					echo "95"
 					echo "# Cleaning up..."
@@ -518,14 +518,12 @@ Choice=$(main_menu)
 			elif [ "$Choice" == "Get_Netplay" ]; then
 				info "Your web browser will open. Download the Linux version of the LDN build, then extract it to $HOME/Applications/HDR/."
 				xdg-open https://www.patreon.com/posts/74910544
-				
-				info "Note you will need to put prod.keys in $HOME/.config/Ryujinx/system/, install system FW, install updates and DLC, and copy your save data over."
 			
 			elif [ "$Choice" == "Configure" ]; then
-				if ! [ -d $HOME/.var/app/org.ryujinx.Ryujinx ]; then
-					error "Ryujinx not found, please install it as a Flatpak and run it at least once."
+				if ! [ -f $HOME/Applications/publish/Ryujinx ]; then
+					error "Ryujinx not found, please install it via EmuDeck and run it at least once."
 				else			
-					flatpak run org.ryujinx.Ryujinx
+					$HOME/Applications/publish/./Ryujinx
 				fi
 		
 			elif [ "$Choice" == "Configure_Netplay" ]; then
@@ -539,7 +537,7 @@ Choice=$(main_menu)
 				if ! [ -f $HOME/Emulation/roms/switch/ssbu.nsp ]; then
 					error "SSBU dump not found. Please place it in $HOME/Emulation/roms/switch/ and name it to ssbu.nsp"
 				else
-					flatpak run org.ryujinx.Ryujinx $HOME/Emulation/roms/switch/ssbu.nsp
+					$HOME/Applications/publish/./Ryujinx $HOME/Emulation/roms/switch/ssbu.nsp
 				fi
 			
 			elif [ "$Choice" == "Netplay" ]; then
@@ -549,7 +547,7 @@ Choice=$(main_menu)
 					if ! [ -f $HOME/Emulation/roms/switch/ssbu.nsp ]; then
 						error "SSBU dump not found. Please place it in $HOME/Emulation/roms/switch/ and name it to ssbu.nsp"
 					else
-						HDR/publish/./Ryujinx $HOME/Emulation/roms/switch/ssbu.nsp
+						$HOME/Applications/publish/./Ryujinx $HOME/Emulation/roms/switch/ssbu.nsp
 					fi
 				fi
 			

@@ -39,13 +39,6 @@ Please run [EmuDeck](https://www.emudeck.com/) first to get the necessary emulat
 - Mupen64 (N64)
 - Ryujinx (Switch)
 
-Alternatively you can install them with:
-
-```
-flatpak install flathub com.github.Rosalie241.RMG
-flatpak install flathub org.ryujinx.Ryujinx
-```
-
 Slippi and Project+/PMEX Remix already come with their own AppImage.
 
 After that run both the Mupen64 and Ryujinx emulators at least once to generate the configuration files.
@@ -58,7 +51,7 @@ Place your legally-dumped ROMs/ISOs in:
 - HDR: `~/Emulation/roms/switch/ssbu.nsp`
 
 ### 3. Additional steps for HDR
-Next, if you're planning on playing HDR, you'll also need to do the following:
+If you're planning on playing HDR, you'll also need to do the following:
 - copy `prod.keys` to `~/.config/Ryujinx/system/`
 - install your dumped Switch FW with Ryujinx
 - dump your save data, DLC, and updates and install these with Ryujinx
