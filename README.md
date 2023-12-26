@@ -34,6 +34,7 @@ That being said, there will still need to be a little bit of legwork needed on y
 ## How to Use
 This repository does NOT contain any copyrighted assets. You must provide your own legally-dumped copies of your ROMs/ISOs.
 
+### 1. Install Emulators
 Please run [EmuDeck](https://www.emudeck.com/) first to get the necessary emulators installed. Emulators you'll want to install, if they're not installed already, include:
 - Mupen64 (N64)
 - Ryujinx (Switch)
@@ -49,18 +50,21 @@ Slippi and Project+/PMEX Remix already come with their own AppImage.
 
 After that run both the Mupen64 and Ryujinx emulators at least once to generate the configuration files.
 
+### 2. Copy ROMs
 Place your legally-dumped ROMs/ISOs in:
 - Smash 64: `~/Emulation/roms/n64/smash64.z64`
 - Slippi: `~/Emulation/roms/gamecube/ssbm.iso`
 - Project+/PMEX Remix: `~/Emulation/roms/wii/ssbb.iso`
 - HDR: `~/Emulation/roms/switch/ssbu.nsp`
 
+### 3. Additional steps for HDR
 Next, if you're planning on playing HDR, you'll also need to do the following:
 - copy `prod.keys` to `~/.config/Ryujinx/system/`
 - install your dumped Switch FW with Ryujinx
 - dump your save data, DLC, and updates and install these with Ryujinx
 - you may need to re-apply these steps if you're using the Ryujinx LDN build
 
+### 4. Run the Script
 Now you're ready to run the script. If you're on Steam Deck, download the [desktop file](https://raw.githubusercontent.com/linuxgamingcentral/competitive-smash-decker/main/competitive-smash-decker.desktop) (right-click, save link as) and save it to your desktop. Double-click or tap the file to download and run the script.
 
 Other distros can run the script with:
