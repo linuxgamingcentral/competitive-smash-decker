@@ -77,7 +77,7 @@ Other distros can run the script with:
 ## Notes
 
 ### Adding to Steam
-Mods are downloaded to `~/Applications/`. Smash 64 Remix and HDR can be added as non-Steam shortcuts with Steam ROM Manager -- included with EmuDeck. Slippi. Lylat, and Project+/PMEX Remix will need to be manually added to Steam at the moment.
+Mods are downloaded to `~/Applications/`. Smash 64 Remix and HDR can be added as non-Steam shortcuts with Steam ROM Manager -- included with EmuDeck. Slippi, Lylat, and Project+/PMEX Remix will need to be manually added to Steam at the moment.
 
 ### Project+/PMEX Remix
 You'll need to manually configure your default ISO, SD card path, and launcher directory with Project+ and PMEX Remix. Additionally, if you switch between playing Project+ and PMEX Remix, you'll need to keep changing the SD card path to switch between mods.
@@ -85,7 +85,7 @@ You'll need to manually configure your default ISO, SD card path, and launcher d
 You *may* need to set the graphics backend to Vulkan if all you get is a white screen when launching either mod.
 
 ### Lylat
-Lylat adds online multiplayer to Akaneia (Melee) and Project+. There are separate builds for each that are downloaded into `~/Applications/Lylat/` as an AppImage. You will need to create a [Lylat account](https://lylat.gg/). Once you've started Lylat, you will be asked to login. Save the `lylat.json` file to `~/Applications/Lylat/`.
+Lylat adds online multiplayer to Akaneia (Melee) and Project+. There are separate builds for each that are downloaded into `~/Applications/Lylat/` as an AppImage. You will need to create a [Lylat account](https://lylat.gg/). Once you've started Lylat, you will be asked to login. Save the `lylat.json` file to `~/.config/SlippiOnline/`.
 
 If you're using the Lylat build for Project+, you will need to set your default ISO, SD card path, and launcher path.
 
