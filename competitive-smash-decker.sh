@@ -64,7 +64,7 @@ smash64_remix_menu() {
 	--column="Description"\
 	FALSE Download "Download Smash 64 Remix patch and patch the ROM"\
 	FALSE Changelog "View patch notes"\
-	FALSE Play "Play Smash 64 Remix"\
+	FALSE Play "Launch Mupen64"\
 	TRUE Exit "Exit this submenu"
 }
 
@@ -74,8 +74,10 @@ slippi_menu() {
 	--column "Option"\
 	--column="Description"\
 	FALSE Launcher "Download or update the Slippi Launcher"\
+	FALSE Lylat "Download or update Lylat (netplay with Akaneia)"\
 	FALSE Launch_Launcher "Launch Slippi Launcher"\
-	FALSE Slippi "Configure Slippi (without launcher)"\
+	FALSE Slippi "Configure or play Slippi (without launcher)"\
+	FALSE Configure_Lylat "Configure or play Lylat"\
 	FALSE Mods "Get mods"\
 	TRUE Exit "Exit this submenu"
 }
@@ -87,6 +89,7 @@ mods_menu() {
 	--column="Description"\
 	FALSE Animelee "Get Animelee (your web browser will open)"\
 	FALSE Diet "Get Diet Melee (your web browser will open)"\
+	FALSE Akaneia "Get Akaneia"\
 	FALSE Other "Get other mods (your web browser will open)"\
 	TRUE Exit "Exit this submenu"
 }
@@ -97,10 +100,9 @@ projectplus_menu() {
 	--column "Option"\
 	--column="Description"\
 	FALSE Download "Download or update Project+"\
-	FALSE Configure "Configure Project+"\
-	FALSE SD "Automatically add SD card path, default ISO, and launcher directories (need to run P+ first)"\
-	FALSE Netplay "Launch Project+ with netplay"\
-	FALSE Offline "Launch Project+ without netplay"\
+	FALSE Lylat "Download or update Lylat (P+ with netplay)"\
+	FALSE Configure "Configure or play Project+"\
+	FALSE Configure_Lylat "Configure or play Lylat"\
 	False Changelog "View changelog (will open your web browser)"\
 	TRUE Exit "Exit this submenu"
 }
@@ -112,9 +114,7 @@ pmex_menu() {
 	--column="Description"\
 	FALSE Download "Download or update PMEX Remix"\
 	FALSE Configure "Configure P+"\
-	FALSE Netplay "Launch PMEX Remix with netplay"\
-	FALSE Offline "Launch PMEX Remix without netplay"\
-	False Guide "View my guide (in case you get stuck)"\
+	FALSE Play "Launch PMEX Remix"\
 	TRUE Exit "Exit this submenu"
 }
 
@@ -124,11 +124,12 @@ hdr_menu() {
 	--column "Option"\
 	--column="Description"\
 	FALSE Download "Download or update HDR"\
-	FALSE Get_Netplay "Download Ryujinx LDN build (your web browser will open)"\
-	FALSE Configure "Configure Ryujinx (video settings, DLC/update management, etc.)"\
-	FALSE Configure_Netplay "Configure Ryujinx LDN build"\
-	FALSE Offline "Launch HDR without netplay"\
-	FALSE Netplay "Launch HDR with netplay"\
+	FALSE Fixes "Add 100% save data and legacy discovery for Ryujinx"\
+	False Fixes_Yuzu "Add 100% save data, legacy discovery, and Wi-Fi fix for Yuzu"\
+	FALSE Configure "Configure Ryujinx"\
+	FALSE Configure_Yuzu "Configure Yuzu"\
+	FALSE Play "Launch HDR with Ryujinx"\
+	FALSE Play_Yuzu "Launch HDR with Yuzu"\
 	TRUE Exit "Exit this submenu"
 }
 
@@ -173,10 +174,40 @@ undo_overclock() {
 	sudo rm /etc/modules-load.d/gcadapter_oc.conf
 }
 
+hdr_patches() {
+	info "Note: you may need to manually copy the files in $HOME/Applications/HDR/ to the proper place if this doesn't work."
+	
+	# download save file, legacy discovery (for ARCropolis), and wifi fix
+	echo -e "Downloading save file...\n"
+	curl -L https://linuxgamingcentral.com/files/hdr/100_save_data.zip -o $HOME/Applications/HDR/save_data.zip
+	sleep 1
+				
+	echo -e "Downloading legacy discovery...\n"
+	curl -L https://linuxgamingcentral.com/files/hdr/legacy_discovery.zip -o $HOME/Applications/HDR/legacy_discovery.zip
+	sleep 1
+				
+	echo -e "Downloading Wi-Fi fix...\n"
+	curl -L https://linuxgamingcentral.com/files/hdr/wifi_fix.zip -o $HOME/Applications/HDR/wifi_fix.zip
+	sleep 1
+				
+	# extraction
+	echo -e "Extracting save data...\n"
+	unzip -o HDR/save_data.zip -d HDR
+	sleep 1
+				
+	echo -e "Extracting legacy discovery...\n"
+	unzip -o HDR/legacy_discovery.zip -d HDR
+	sleep 1
+				
+	echo -e "Extracting Wi-Fi fix...\n"
+	unzip -o HDR/wifi_fix.zip -d HDR
+	sleep 1			
+}
+
 # unused functions
 patch_iso() {
 	# this is just temporary code for now and isn't currently used in the script; Mediafire is sketchy
-	if ! [ -f $HOME/Emulation/roms/gamecube/ssbm.iso ]; then
+	if ! [ -f $melee_ROM ]; then
 		error "SSBM ISO not found. Please place it in $HOME/Emulation/roms/gamecube/ and name it to ssbm.iso"
 	else
 	(
@@ -188,7 +219,7 @@ patch_iso() {
 		cd ANIMELEE\ -\ COMPLETE\ EDITION/
 							
 		echo -e "Patching...\n"
-		xdelta3 -d -f -s $HOME/Emulation/roms/gamecube/ssbm.iso "ANIMELEE - COMPLETE EDITION.xdelta" $HOME/Emulation/roms/gamecube/animelee.iso
+		xdelta3 -d -f -s $melee_ROM "ANIMELEE - COMPLETE EDITION.xdelta" $HOME/Emulation/roms/gamecube/animelee.iso
 
 		echo -e "Removing unneccesary files...\n"
 		cd $HOME/Applications
@@ -198,6 +229,24 @@ patch_iso() {
 		info "SSBM has been patched!"
 	fi
 }
+
+# variables
+
+# roms
+smash64_ROM=$HOME/Emulation/roms/n64/smash64.z64
+melee_ROM=$HOME/Emulation/roms/gamecube/ssbm.iso
+brawl_ROM=$HOME/Emulation/roms/wii/ssbb.iso
+ultimate_ROM=$HOME/Emulation/roms/switch/ssbu.nsp
+
+# executables
+slippi_launcher=$HOME/Applications/Slippi-Launcher/Slippi-Launcher.AppImage
+slippi=$HOME/.config/Slippi\ Launcher/netplay/Slippi_Online-x86_64.AppImage
+lylat_melee=$HOME/Applications/Lylat/Lylat.AppImage
+project_plus=$HOME/Applications/ProjectPlus/Faster_Project_Plus-x86-64.AppImage
+lylat_project_plus=$HOME/Applications/Lylat/Lylat_Online-x86_64.AppImage
+
+ryujinx=$HOME/Applications/publish/Ryujinx
+yuzu=$HOME/Applications/yuzu.AppImage
 
 # Check if GitHub is reachable
 if ! curl -Is https://github.com | head -1 | grep 200 > /dev/null
@@ -234,13 +283,13 @@ Choice=$(main_menu)
 			
 			elif [ "$Choice" == "Download" ]; then
 				#check to see if ROM exists
-				if ! [ -f $HOME/Emulation/roms/n64/smash64.z64 ]; then
+				if ! [ -f $smash64_ROM ]; then
 					error "ROM not found. Please put it in $HOME/Emulation/roms/n64/ and name it to smash64.z64"
 				else
 					curl -L $(curl -s https://api.github.com/repos/JSsixtyfour/smashremix/releases/latest | grep "browser_download_url" | cut -d '"' -f 4) -o smashremix.zip
 					unzip -o smashremix.zip
 					chmod +x smashremix*/.ezpatch/bin/linux/ucon64 smashremix*/.ezpatch/bin/linux/xdelta3 smashremix*/.ezpatch/scripts/unix.sh
-					bash smashremix*/.ezpatch/scripts/unix.sh $HOME/Emulation/roms/n64/smash64.z64
+					bash smashremix*/.ezpatch/scripts/unix.sh $smash64_ROM
 					mv smashremix*/output/smashremix*.z64 $HOME/Emulation/roms/n64/
 					info "Smash 64 Remix ROM has been moved over to $HOME/Emulation/roms/n64/."
 					rm smashremix.zip
@@ -283,24 +332,42 @@ Choice=$(main_menu)
         				| grep "browser_download_url" \
 			        	| grep AppImage \
 			        	| cut -d '"' -f 4)
-				curl -L "$DOWNLOAD_URL" -o Slippi-Launcher/Slippi-Launcher.AppImage
+				curl -L "$DOWNLOAD_URL" -o $slippi_launcher
 				
-				chmod +x Slippi-Launcher/Slippi-Launcher.AppImage
+				chmod +x $slippi_launcher
 				info "Slippi Launcher downloaded/updated!"
 			
+			elif [ "$Choice" == "Lylat" ]; then
+				mkdir -p Lylat
+				
+				echo -e "Downloading...\n"
+				curl -L $(curl -s https://api.github.com/repos/project-lylat/Ishiiruka/releases/latest | grep "browser_download_url" | grep AppImage | cut -d '"' -f 4) -o $lylat_melee
+				curl -L $(curl -s https://api.github.com/repos/project-lylat/Ishiiruka/releases/latest | grep "browser_download_url" | grep zsync | cut -d '"' -f 4) -o $lylat_melee.zsync
+				
+				chmod +x $lylat_melee
+				
+				info "Lylat downloaded/updated!"
+			
 			elif [ "$Choice" == "Launch_Launcher" ]; then
-				if ! [ -f Slippi-Launcher/Slippi-Launcher.AppImage ]; then
+				if ! [ -f $slippi_launcher ]; then
 					error "Slippi Launcher AppImage not found."
 				else
-					./Slippi-Launcher/Slippi-Launcher.AppImage
+					exec $slippi_launcher
 				fi
 			
 			elif [ "$Choice" == "Slippi" ]; then
-				if ! [ -f "$HOME/.config/Slippi Launcher/netplay/Slippi_Online-x86_64.AppImage" ]; then
+				if ! [ -f "$slippi" ]; then
 					error "Slippi AppImage not found."
 				else
-					"$HOME/.config/Slippi Launcher/netplay/./Slippi_Online-x86_64.AppImage"
+					exec "$slippi"
 				fi				
+			
+			elif [ "$Choice" == "Configure_Lylat" ]; then
+				if ! [ -f $lylat_melee ]; then
+					error "Lylat AppImage not found."
+				else
+					exec $lylat_melee
+				fi
 			
 			elif [ "$Choice" == "Mods" ]; then
 				while true; do
@@ -316,6 +383,37 @@ Choice=$(main_menu)
 					elif [ "$Choice" == "Diet" ]; then
 						xdg-open https://diet.melee.tv/
 					
+					elif [ "$Choice" == "Akaneia" ]; then
+						if ! [ -f $melee_ROM ]; then
+							error "SSBM not found. Please name it to ssbm.iso and put it in $HOME/Emulation/roms/gamecube/."
+						else
+							# check if user has xdelta3, if not download it
+							if ! [ -f $HOME/Applications/xdelta3/xdelta3 ]; then
+								echo -e "Downloading xdelta3...\n"
+								mkdir -p $HOME/Applications/xdelta3
+								curl -L https://linuxgamingcentral.com/files/xdelta3 -o $HOME/Applications/xdelta3/xdelta3
+								chmod +x $HOME/Applications/xdelta3/xdelta3
+							fi
+							
+							# download the patch and patch the ISO
+							# progress bar doesn't seem to work here, just have to use terminal text for now
+
+							echo -e "Downloading...\n"
+							curl -L $(curl -s https://api.github.com/repos/akaneia/akaneia-build/releases/latest | grep "browser_download_url" | cut -d '"' -f 4) -o akaneia.7z
+							
+							echo -e "Extracting...\n"
+							7za x akaneia.7z
+							
+							echo -e "Patching, this will take a minute or two...\n"
+							$HOME/Applications/xdelta3/./xdelta3 -dfs $melee_ROM $HOME/Applications/Akaneia\ Builder/patch.xdelta $HOME/Emulation/roms/gamecube/akaneia.iso
+							
+							echo -e "Cleaning up...\n"
+							rm -rf Akaneia\ Builder
+							rm akaneia.7z
+							
+							info "Akaneia added to $HOME/Emulation/roms/gamecube/akaneia.iso!"
+						fi
+						
 					elif [ "$Choice" == "Other" ]; then
 						xdg-open https://ssbmtextures.com
 					
@@ -349,7 +447,7 @@ Choice=$(main_menu)
 				tar -xf Launcher.tar.gz
 				tar -xf ProjectPlusSD*.tar.gz
 				
-				chmod +x Faster_Project_Plus-x86-64.AppImage
+				chmod +x $project_plus
 				
 				echo "90"
 				echo "# Cleaning up..."
@@ -360,46 +458,37 @@ Choice=$(main_menu)
 				
 				cd $HOME/Applications
 			
-			elif [ "$Choice" == "Configure" ]; then
-				if ! [ -f ProjectPlus/Faster_Project_Plus-x86-64.AppImage ]; then
-					error "Project+ AppImage not found."
-				else
-					ProjectPlus/./Faster_Project_Plus-x86-64.AppImage
-				fi
-
-			elif [ "$Choice" == "SD" ]; then
-				settings_file=$HOME/.config/FasterPPlus/Dolphin.ini
+			elif [ "$Choice" == "Lylat" ]; then
+				mkdir -p Lylat
 				
-				if ! [ -f $settings_file ]; then
-					error "Config file not found, please run Project+ prior to running this command."
-				else
-					# set the SD card path
-					sed -i "s#${HOME}/.local/share/FasterPPlus/Wii/sd.raw#${HOME}/Applications/ProjectPlus/sd.raw#g" $settings_file
-					
-					# change ISO paths from 0 to 1
-					sed -i 's#ISOPaths = 0#ISOPaths = 1#g' $settings_file
-					
-					# add launcher path
-					sed -i "9a\ISOPath0 = ${HOME}/Applications/ProjectPlus/Launcher" $settings_file
-						
-					# specify default ISO
-					sed -i "s#DefaultISO = #DefaultISO = ${HOME}/Emulation/roms/wii/ssbb.iso#g" $settings_file
-					
-					info "File paths added!"
-				fi
+				echo -e "Downloading...\n"
+				curl -L $(curl -s https://api.github.com/repos/project-lylat/dolphin/releases/latest | grep "browser_download_url" | grep linux | cut -d '"' -f 4) -o lylat.zip
+				
+				echo -e "Extracting...\n"
+				unzip -o lylat.zip
+				rm lylat.zip
+				unzip -o *.zip
+				
+				mv *.AppImage *.AppImage.zsync $HOME/Applications/Lylat
+				chmod +x $HOME/Applications/Lylat/*.AppImage
+				
+				echo -e "Cleaning up...\n"
+				rm *.zip
+
+				info "Lylat downloaded/updated!"
 			
-			elif [ "$Choice" == "Netplay" ]; then
-				if ! [ -f ProjectPlus/Faster_Project_Plus-x86-64.AppImage ]; then
+			elif [ "$Choice" == "Configure" ]; then
+				if ! [ -f $project_plus ]; then
 					error "Project+ AppImage not found."
 				else
-					ProjectPlus/./Faster_Project_Plus-x86-64.AppImage "$HOME/Applications/ProjectPlus/Launcher/Project+ Netplay Launcher.dol"
+					exec $project_plus
 				fi
 			
-			elif [ "$Choice" == "Offline" ]; then
-				if ! [ -f ProjectPlus/Faster_Project_Plus-x86-64.AppImage ]; then
-					error "Project+ AppImage not found."
+			elif [ "$Choice" == "Configure_Lylat" ]; then
+				if ! [ -f $lylat_project_plus ]; then
+					error "Lylat AppImage not found."
 				else
-					ProjectPlus/./Faster_Project_Plus-x86-64.AppImage "$HOME/Applications/ProjectPlus/Launcher/Project+ Offline Launcher.dol"
+					exec $lylat_project_plus
 				fi
 			
 			elif [ "$Choice" == "Changelog" ]; then
@@ -418,55 +507,32 @@ Choice=$(main_menu)
 					
 			elif [ "$Choice" == "Download" ]; then
 				mkdir -p PMEX-Remix
-				cd PMEX-Remix
-				
-				info "Note: due to PMEX Remix being hosted on Google Drive, you'll need to manually download the Dolphin release.\n
-				Click OK to open the Google Drive link in your web browser. Save the .rar file to $HOME/Applications/PMEX-Remix.\n
-				Press Enter in the terminal after the download is complete to finish the setup."
-				xdg-open https://drive.google.com/drive/folders/1u6aENdnSyDio-CmpNRLg8NXxc8xoYfQh
-				read -p "Press Enter after downloading to extract the archive: " </dev/tty
+
+				# code to be executed here...
+				echo -e "Downloading...\n"
+				curl -L https://linuxgamingcentral.com/files/pmex.zip -o $HOME/Applications/PMEX-Remix/pmex.zip
 				
 				echo -e "Extracting...\n"
-				unrar x -o+ PMEX\ REMIX\ 0.95DX\ \[DOLPHIN\].rar
-				
-				echo -e "Copying textures...\n"
-				cp -r PMEX\ REMIX\ 0.95DX\ \[DOLPHIN\]/User/Load/Textures/RSBE01/ ~/.local/share/FasterPPlus/Load/Textures/
+				unzip -o $HOME/Applications/PMEX-Remix/pmex.zip -d $HOME/Applications/PMEX-Remix/
 				
 				echo -e "Cleaning up...\n"
-				rm PMEX\ REMIX\ 0.95DX\ \[DOLPHIN\].rar
+				rm $HOME/Applications/PMEX-Remix/pmex.zip
 				
 				info "PMEX Remix downloaded!"
-				info "Please remember to do the following:\n
-				1. Configure your launcher path, your default ISO, and your SD card path in P+.\n
-				2. Set P+ in fullscreen, set aspect ratio to 16:10 if you're on Deck.\n
-				3. Check 'Load custom textures' from Graphics -> Advanced.\n
-				4. Set up your controls in Game Mode if you're not using a GCC."
-				
-				cd $HOME/Applications
 			
 			elif [ "$Choice" == "Configure" ]; then
-				if ! [ -f ProjectPlus/Faster_Project_Plus-x86-64.AppImage ]; then
+				if ! [ -f $project_plus ]; then
 					error "Project+ AppImage not found."
 				else
-					ProjectPlus/./Faster_Project_Plus-x86-64.AppImage
-				fi
-	
-			elif [ "$Choice" == "Netplay" ]; then
-				if ! [ -f ProjectPlus/Faster_Project_Plus-x86-64.AppImage ]; then
-					error "Project+ AppImage not found."
-				else
-					ProjectPlus/./Faster_Project_Plus-x86-64.AppImage "$HOME/Applications/PMEX-Remix/PMEX REMIX 0.95DX [DOLPHIN]/Launcher/P+EX REMIX NETPLAY/Dolphin_Remix_Netplay_Launcher.elf"
+					exec $project_plus
 				fi
 			
-			elif [ "$Choice" == "Offline" ]; then
-				if ! [ -f ProjectPlus/Faster_Project_Plus-x86-64.AppImage ]; then
+			elif [ "$Choice" == "Play" ]; then
+				if ! [ -f $project_plus ]; then
 					error "Project+ AppImage not found."
 				else
-					ProjectPlus/./Faster_Project_Plus-x86-64.AppImage "$HOME/Applications/PMEX-Remix/PMEX REMIX 0.95DX [DOLPHIN]/Launcher/P+EX REMIX OFFLINE/Project_Offline_Launcher.elf"
+					exec $project_plus "$HOME/Applications/PMEX-Remix/Launcher/P+EX REMIX OFFLINE/Project_Offline_Launcher.elf"
 				fi
-			
-			elif [ "$Choice" == "Guide" ]; then
-				xdg-open https://linuxgamingcentral.com/posts/how-to-setup-project-m-ex-on-deck/
 					
 			fi
 		done	
@@ -481,74 +547,116 @@ Choice=$(main_menu)
 			elif [ "$Choice" == "Download" ]; then
 				mkdir -p HDR
 				
-				if ! [ -f $HOME/Applications/publish/Ryujinx ]; then
-					error "Ryujinx not found, please install it via EmuDeck and run it at least once."
-				else
-				(
-					echo "20"
-					echo "# Downloading..."
-					DOWNLOAD_URL=$(curl -s https://api.github.com/repos/HDR-Development/HDR-Releases/releases/latest \
-						| grep "browser_download_url" \
-						| grep ryujinx-package.zip \
-						| cut -d '"' -f 4)
-					curl -L "$DOWNLOAD_URL" -o HDR/hdr.zip
-					
-					echo "50"
-					echo "# Extracting..."
-					unzip -o -q HDR/hdr.zip -d HDR
-					
-					echo "70"
-					echo "# Copying..."
-					cp -r HDR/sdcard $HOME/.config/Ryujinx/
-					
-					# We need to update ARCropolis, since the current version shipped with HDR won't work...
-					echo "85"
-					echo "# Updating ARCropolis..."
-					curl -L https://github.com/Raytwo/ARCropolis/releases/download/v4.0.0/release.zip -o HDR/arcropolis.zip
-					unzip -o HDR/arcropolis.zip -d $HOME/.config/Ryujinx/sdcard/
-					
-					echo "95"
-					echo "# Cleaning up..."
-					rm HDR/hdr.zip HDR/arcropolis.zip
-					) | progress_bar ""
-					
-					info "HDR successfully downloaded and installed!"
+				if ! [ -d $HOME/.config/Ryujinx ]; then
+					error "Ryujinx configuration not found, please install Ryujinx via EmuDeck and run it at least once to generate the config files/folders."
+					break
 				fi
 				
-			elif [ "$Choice" == "Get_Netplay" ]; then
-				info "Your web browser will open. Download the Linux version of the LDN build, then extract it to $HOME/Applications/HDR/."
-				xdg-open https://www.patreon.com/posts/74910544
-			
-			elif [ "$Choice" == "Configure" ]; then
-				if ! [ -f $HOME/Applications/publish/Ryujinx ]; then
-					error "Ryujinx not found, please install it via EmuDeck and run it at least once."
-				else			
-					$HOME/Applications/publish/./Ryujinx
+				if ! [ -d $HOME/.local/share/yuzu ]; then
+					error "Yuzu configuration not found, please install Yuzu via EmuDeck and run it at least once to generate the config files/folders."
+					break
 				fi
 		
-			elif [ "$Choice" == "Configure_Netplay" ]; then
-				if ! [ -f HDR/publish/Ryujinx ]; then
-					error "Ryujinx LDN build not found."
-				else			
-					HDR/publish/./Ryujinx
-				fi
+				(
+				echo "20"
+				echo "# Downloading HDR..."
+				DOWNLOAD_URL=$(curl -s https://api.github.com/repos/HDR-Development/HDR-Releases/releases/latest \
+					| grep "browser_download_url" \
+					| grep ryujinx-package.zip \
+					| cut -d '"' -f 4)
+				curl -L "$DOWNLOAD_URL" -o HDR/hdr.zip
 				
-			elif [ "$Choice" == "Offline" ]; then
-				if ! [ -f $HOME/Emulation/roms/switch/ssbu.nsp ]; then
-					error "SSBU dump not found. Please place it in $HOME/Emulation/roms/switch/ and name it to ssbu.nsp"
+				echo "50"
+				echo "# Extracting HDR..."
+				unzip -o -q HDR/hdr.zip -d HDR
+					
+				echo "70"
+				echo "# Copying HDR to Ryujinx..."
+				cp -r HDR/sdcard $HOME/.config/Ryujinx/
+					
+				echo "85"
+				echo "# Copying HDR to Yuzu..."
+				cp -r HDR/sdcard/atmosphere $HOME/.local/share/yuzu/sdmc/
+				cp -r HDR/sdcard/ultimate $HOME/.local/share/yuzu/sdmc/
+					
+				echo "95"
+				echo "# Cleaning up..."
+				rm HDR/hdr.zip
+				) | progress_bar ""
+					
+				info "HDR successfully downloaded and installed!"
+				info "Please run Smash Ultimate once with Ryujinx and/or Yuzu to generate the necessary files/folders, then run 'Fixes' to get HDR properly working."
+					
+			elif [ "$Choice" == "Fixes" ]; then
+				if ! [ -d $HOME/.config/Ryujinx/sdcard/ultimate/arcropolis ]; then
+					error "ARCropolis folder not found for Ryujinx, you need to run Smash Ultimate at least once in order to apply the fixes."
 				else
-					$HOME/Applications/publish/./Ryujinx $HOME/Emulation/roms/switch/ssbu.nsp
+					hdr_patches #download and extract patches
+							
+					echo -e "Copying save data for Ryujinx...\n"
+					cp -r HDR/save_data $HOME/.config/Ryujinx/bis/user/save/0000000000000001/0/
+					sleep 1
+					
+					echo -e "Copying legacy discovery for Ryujinx...\n"
+					cp HDR/legacy_discovery $HOME/.config/Ryujinx/sdcard/ultimate/arcropolis/config/*/*/
+					sleep 1
+					
+					echo -e "Cleaning up...\n"
+					rm HDR/save_data.zip HDR/legacy_discovery.zip HDR/wifi_fix.zip
+					
+					info "HDR fixes applied for Ryujinx! HDR should now work as expected."
 				fi
 			
-			elif [ "$Choice" == "Netplay" ]; then
-				if ! [ -f HDR/publish/Ryujinx ]; then
-					error "Ryujinx LDN build not found."
+			elif [ "$Choice" == "Fixes_Yuzu" ]; then
+				if ! [ -d $HOME/.local/share/yuzu/sdmc/ultimate/arcropolis ]; then
+					error "ARCropolis folder not found for Yuzu, you need to run Smash Ultimate at least once in order to apply the fixes."
 				else
-					if ! [ -f $HOME/Emulation/roms/switch/ssbu.nsp ]; then
-						error "SSBU dump not found. Please place it in $HOME/Emulation/roms/switch/ and name it to ssbu.nsp"
-					else
-						$HOME/Applications/publish/./Ryujinx $HOME/Emulation/roms/switch/ssbu.nsp
-					fi
+					hdr_patches #download and extract patches
+					
+					echo -e "Copying save data for Yuzu...\n"
+					cp -r HDR/save_data $HOME/.local/share/yuzu/nand/user/save/0000000000000000/6D6064528B826BAAF7F418309CBC8407/01006A800016E000/
+					sleep 1
+					
+					echo -e "Copying legacy discovery for Yuzu...\n"
+					cp HDR/legacy_discovery $HOME/.local/share/yuzu/sdmc/ultimate/arcropolis/config/*/*/
+					sleep 1
+					
+					echo -e "Copying Wi-Fi fix for Yuzu...\n"
+					cp HDR/subsdk9 $HOME/.local/share/yuzu/sdmc/atmosphere/contents/01006A800016E000/exefs/
+					sleep 1
+					
+					echo -e "Cleaning up...\n"
+					rm HDR/save_data.zip HDR/legacy_discovery.zip HDR/wifi_fix.zip
+					
+					info "HDR fixes applied for Yuzu! HDR should now work as expected."
+				fi
+			
+			elif [ "$Choice" == "Configure" ]; then
+				if ! [ -f $ryujinx ]; then
+					error "Ryujinx not found, please install it via EmuDeck and run it at least once."
+				else			
+					exec $ryujinx
+				fi
+				
+			elif [ "$Choice" == "Configure_Yuzu" ]; then
+				if ! [ -f $yuzu ]; then
+					error "Yuzu not found, please install it via EmuDeck and run it at least once."
+				else
+					exec $yuzu
+				fi
+			
+			elif [ "$Choice" == "Play" ]; then
+				if ! [ -f $ultimate_ROM ]; then
+					error "SSBU dump not found. Please place it in $HOME/Emulation/roms/switch/ and name it to ssbu.nsp"
+				else
+					exec $ryujinx $ultimate_ROM
+				fi
+			
+			elif [ "$Choice" == "Play_Yuzu" ]; then
+				if ! [ -f $ultimate_ROM ]; then
+					error "SSBU dump not found. Please place it in $HOME/Emulation/roms/switch/ and name it to ssbu.nsp"
+				else
+					exec $yuzu $ultimate_ROM
 				fi
 			
 			fi
