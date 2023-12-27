@@ -467,9 +467,8 @@ Choice=$(main_menu)
 				echo -e "Extracting...\n"
 				unzip -o lylat.zip
 				rm lylat.zip
-				unzip -o *.zip
+				unzip -o *.zip -d $HOME/Applications/Lylat
 				
-				mv *.AppImage *.AppImage.zsync $HOME/Applications/Lylat
 				chmod +x $HOME/Applications/Lylat/*.AppImage
 				
 				echo -e "Cleaning up...\n"
@@ -576,8 +575,15 @@ Choice=$(main_menu)
 					
 				echo "85"
 				echo "# Copying HDR to Yuzu..."
-				cp -r HDR/sdcard/atmosphere $HOME/.local/share/yuzu/sdmc/
-				cp -r HDR/sdcard/ultimate $HOME/.local/share/yuzu/sdmc/
+				
+				# need to copy HDR files to a different place on Deck with Yuzu, since the default sdmc location is different...
+				if [ $USER == "deck" ]; then
+					cp -r HDR/sdcard/atmosphere $HOME/Emulation/storage/yuzu/sdmc/
+					cp -r HDR/sdcard/ultimate $HOME/Emulation/storage/yuzu/sdmc/
+				else
+					cp -r HDR/sdcard/atmosphere $HOME/.local/share/yuzu/sdmc/
+					cp -r HDR/sdcard/ultimate $HOME/.local/share/yuzu/sdmc/
+				fi
 					
 				echo "95"
 				echo "# Cleaning up..."
@@ -608,27 +614,47 @@ Choice=$(main_menu)
 				fi
 			
 			elif [ "$Choice" == "Fixes_Yuzu" ]; then
-				if ! [ -d $HOME/.local/share/yuzu/sdmc/ultimate/arcropolis ]; then
+				if ! [ -d $HOME/Emulation/storage/yuzu/sdmc/ultimate/arcropolis ]; then
 					error "ARCropolis folder not found for Yuzu, you need to run Smash Ultimate at least once in order to apply the fixes."
 				else
 					hdr_patches #download and extract patches
 					
-					echo -e "Copying save data for Yuzu...\n"
-					cp -r HDR/save_data $HOME/.local/share/yuzu/nand/user/save/0000000000000000/6D6064528B826BAAF7F418309CBC8407/01006A800016E000/
-					sleep 1
-					
-					echo -e "Copying legacy discovery for Yuzu...\n"
-					cp HDR/legacy_discovery $HOME/.local/share/yuzu/sdmc/ultimate/arcropolis/config/*/*/
-					sleep 1
-					
-					echo -e "Copying Wi-Fi fix for Yuzu...\n"
-					cp HDR/subsdk9 $HOME/.local/share/yuzu/sdmc/atmosphere/contents/01006A800016E000/exefs/
-					sleep 1
-					
-					echo -e "Cleaning up...\n"
-					rm HDR/save_data.zip HDR/legacy_discovery.zip HDR/wifi_fix.zip
-					
-					info "HDR fixes applied for Yuzu! HDR should now work as expected."
+					# copy the files to the default sdmc location on Deck
+					if [ $USER == "deck" ]; then
+						echo -e "Copying save data for Yuzu...\n"
+						cp -r HDR/save_data $HOME/Emulation/storage/yuzu/nand/user/save/0000000000000000/*/01006A800016E000/
+						sleep 1
+						
+						echo -e "Copying legacy discovery for Yuzu...\n"
+						cp HDR/legacy_discovery $HOME/Emulation/storage/yuzu/sdmc/ultimate/arcropolis/config/*/*/
+						sleep 1
+						
+						echo -e "Copying Wi-Fi fix for Yuzu...\n"
+						cp HDR/subsdk9 $HOME/Emulation/storage/yuzu/sdmc/atmosphere/contents/01006A800016E000/exefs/
+						sleep 1
+						
+						echo -e "Cleaning up...\n"
+						rm HDR/save_data.zip HDR/legacy_discovery.zip HDR/wifi_fix.zip
+						
+						info "HDR fixes applied for Yuzu! HDR should now work as expected."
+					else
+						echo -e "Copying save data for Yuzu...\n"
+						cp -r HDR/save_data $HOME/.local/share/yuzu/nand/user/save/0000000000000000/*/01006A800016E000/
+						sleep 1
+						
+						echo -e "Copying legacy discovery for Yuzu...\n"
+						cp HDR/legacy_discovery $HOME/.local/share/yuzu/sdmc/ultimate/arcropolis/config/*/*/
+						sleep 1
+						
+						echo -e "Copying Wi-Fi fix for Yuzu...\n"
+						cp HDR/subsdk9 $HOME/.local/share/yuzu/sdmc/atmosphere/contents/01006A800016E000/exefs/
+						sleep 1
+						
+						echo -e "Cleaning up...\n"
+						rm HDR/save_data.zip HDR/legacy_discovery.zip HDR/wifi_fix.zip
+						
+						info "HDR fixes applied for Yuzu! HDR should now work as expected."
+					fi	
 				fi
 			
 			elif [ "$Choice" == "Configure" ]; then
