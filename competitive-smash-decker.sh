@@ -6,6 +6,12 @@ echo -e "Competitive Smash Decker - script by Linux Gaming Central\n"
 
 title="Competitive Smash Decker"
 
+if [ $USER == "deck" ]; then
+	echo -e "User is using a Steam Deck.\n"
+elif [ $USER == "gamer" ]; then
+	echo -e "User is using ChimeraOS.\n"
+fi
+
 # Removes unhelpful GTK warnings
 zen_nospam() {
   zenity 2> >(grep -v 'Gtk' >&2) "$@"
@@ -87,8 +93,11 @@ mods_menu() {
 	--column ""\
 	--column "Option"\
 	--column="Description"\
-	FALSE Animelee "Get Animelee (your web browser will open)"\
-	FALSE Diet "Get Diet Melee (your web browser will open)"\
+	FALSE Animelee "Get Animelee"\
+	FALSE Animelee_DBZ "Get Animelee (DBZ edition)"\
+	FALSE Diet "Get Diet Melee (Classic edition)"\
+	FALSE DietCrystal "Get Diet Melee (Crystal edition) CURRENTLY NOT WORKING"\
+	FALSE Diet64 "Get Diet Melee (N64 edition) CURRENTLY NOT WORKING"\
 	FALSE Akaneia "Get Akaneia"\
 	FALSE Other "Get other mods (your web browser will open)"\
 	TRUE Exit "Exit this submenu"
@@ -146,32 +155,72 @@ get_sudo_password() {
 	fi
 }
 
-overclock () {
-	rm -rf gcadapter-oc-kmod
-
-	# Clone repo and change into the directory
-	git clone https://github.com/hannesmann/gcadapter-oc-kmod.git
-	cd gcadapter-oc-kmod
-
-	# Make the module
-	make
-
-	# Install it
-	sudo insmod gcadapter_oc.ko
-
-	# Persist across reboots
-	sudo mkdir -p "/usr/lib/modules/$(uname -r)/extra"
-	sudo cp gcadapter_oc.ko "/usr/lib/modules/$(uname -r)/extra"
-	sudo depmod
-	echo "gcadapter_oc" | sudo tee /etc/modules-load.d/gcadapter_oc.conf
+check_if_xdelta_exists() {
+	# check if user has xdelta3, if not download it
+	if ! [ -f $HOME/Applications/xdelta3/xdelta3 ]; then
+		echo -e "Downloading xdelta3...\n"
+		mkdir -p $HOME/Applications/xdelta3
+		curl -L https://linuxgamingcentral.com/files/xdelta3 -o $HOME/Applications/xdelta3/xdelta3
+		chmod +x $HOME/Applications/xdelta3/xdelta3
+	fi
 }
 
-undo_overclock() {
-	cd gcadapter-oc-kmod/
-	sudo rmmod gcadapter_oc.ko
-	make clean
-	sudo rm /usr/lib/modules/$(uname -r)/extra/gcadapter_oc.ko
-	sudo rm /etc/modules-load.d/gcadapter_oc.conf
+apply_animelee_patch() {
+	zip_name=$1
+	patch_name=$2
+	output_iso=$3
+	
+	if ! [ -f $melee_ROM ]; then
+		error "SSBM not found. Please put it in $melee_ROM."
+	else
+		check_if_xdelta_exists
+		
+		mkdir -p $HOME/Applications/Slippi-Launcher/animelee
+
+		echo -e "Downloading...\n"
+		curl -L https://linuxgamingcentral.com/files/animelee/$1 -o $HOME/Applications/Slippi-Launcher/animelee/$1
+		
+		echo -e "Extracting...\n"
+		unzip -o $HOME/Applications/Slippi-Launcher/animelee/$1 -d $HOME/Applications/Slippi-Launcher/animelee/
+		
+		echo -e "Patching, this will take a minute or two...\n"
+		$HOME/Applications/xdelta3/./xdelta3 -dfs $melee_ROM $HOME/Applications/Slippi-Launcher/animelee/$2 $HOME/Emulation/roms/gamecube/$3
+		
+		echo -e "Cleaning up...\n"
+		rm $HOME/Applications/Slippi-Launcher/animelee/$1
+		
+		info "$3 added to $HOME/Emulation/roms/gamecube/!"
+	fi
+}
+
+apply_diet_patch() {
+	patch_name=$1
+	output_iso=$2
+	
+	if ! [ -f $melee_ROM ]; then
+		error "SSBM not found. Please put it in $melee_ROM."
+	else
+		check_if_xdelta_exists
+							
+		mkdir -p $HOME/Applications/Slippi-Launcher/diet_melee
+							
+		# check to see if patch exists, if not download it
+		if ! [ -f $HOME/Applications/Slippi-Launcher/diet_melee/$1 ]; then
+			echo -e "$1 not found, downloading...\n"
+			curl -L https://linuxgamingcentral.com/files/diet_melee/diet_melee.zip -o $HOME/Applications/Slippi-Launcher/diet_melee/diet_melee.zip
+								
+			echo -e "Extracting...\n"
+			unzip -o $HOME/Applications/Slippi-Launcher/diet_melee/diet_melee.zip -d $HOME/Applications/Slippi-Launcher/diet_melee/
+								
+			echo -e "Cleaning up...\n"
+			rm $HOME/Applications/Slippi-Launcher/diet_melee/diet_melee.zip
+		fi
+							
+		echo -e "Patching, this will take a minute or two...\n"
+		$HOME/Applications/xdelta3/./xdelta3 -dfs $melee_ROM $HOME/Applications/Slippi-Launcher/diet_melee/$1 $HOME/Emulation/roms/gamecube/$2
+							
+		info "$2 added to $HOME/Emulation/roms/gamecube/!"
+	fi
 }
 
 hdr_patches() {
@@ -204,33 +253,33 @@ hdr_patches() {
 	sleep 1			
 }
 
-# unused functions
-patch_iso() {
-	# this is just temporary code for now and isn't currently used in the script; Mediafire is sketchy
-	if ! [ -f $melee_ROM ]; then
-		error "SSBM ISO not found. Please place it in $HOME/Emulation/roms/gamecube/ and name it to ssbm.iso"
-	else
-	(
-		echo -e "Downloading patch...\n"
-		wget https://download2287.mediafire.com/uzd4l18ou6hgtVelarOGjJPKZg_QxAPUVMoZiZp-QcolWub8GdRC0YqtpBP4pcCJMp-kee8IUfLKf20sdhBWMNRF75yiq8z5TXMYn20bmbmUUcetRyFPzh3RLYhPOpLXE8FdtpLCCIx-yv_oMYyVXzfodH5M6eOMxoc42Snu9bEm/2ztqob93nrug8yg/ANIMELEE+-+COMPLETE+EDITION+-+PATCH+1.0.zip
-		
-		echo -e "Extracting...\n"
-		unzip -o ANIMELEE+-+COMPLETE+EDITION+-+PATCH+1.0.zip
-		cd ANIMELEE\ -\ COMPLETE\ EDITION/
-							
-		echo -e "Patching...\n"
-		xdelta3 -d -f -s $melee_ROM "ANIMELEE - COMPLETE EDITION.xdelta" $HOME/Emulation/roms/gamecube/animelee.iso
+overclock () {
+	rm -rf gcadapter-oc-kmod
 
-		echo -e "Removing unneccesary files...\n"
-		cd $HOME/Applications
-		rm ANIMELEE+-+COMPLETE+EDITION+-+PATCH+1.0.zip
-		rm -rf ANIMELEE\ -\ COMPLETE\ EDITION/
-		) | progress_bar "Patching, please wait..."
-		info "SSBM has been patched!"
-	fi
+	# Clone repo and change into the directory
+	git clone https://github.com/hannesmann/gcadapter-oc-kmod.git
+	cd gcadapter-oc-kmod
+
+	# Make the module
+	make
+
+	# Install it
+	sudo insmod gcadapter_oc.ko
+
+	# Persist across reboots
+	sudo mkdir -p "/usr/lib/modules/$(uname -r)/extra"
+	sudo cp gcadapter_oc.ko "/usr/lib/modules/$(uname -r)/extra"
+	sudo depmod
+	echo "gcadapter_oc" | sudo tee /etc/modules-load.d/gcadapter_oc.conf
 }
 
-# variables
+undo_overclock() {
+	cd gcadapter-oc-kmod/
+	sudo rmmod gcadapter_oc.ko
+	make clean
+	sudo rm /usr/lib/modules/$(uname -r)/extra/gcadapter_oc.ko
+	sudo rm /etc/modules-load.d/gcadapter_oc.conf
+}
 
 # roms
 smash64_ROM=$HOME/Emulation/roms/n64/smash64.z64
@@ -377,23 +426,26 @@ Choice=$(main_menu)
 						break
 					
 					elif [ "$Choice" == "Animelee" ]; then
-						# Mediafire files are sketchy, users will just have to go to the webpage for now
-						xdg-open https://animelee.xyz
+						apply_animelee_patch "animelee.zip" "animelee.xdelta" "animelee.iso"
+					
+					elif [ "$Choice" == "Animelee_DBZ" ]; then
+						apply_animelee_patch "animelee_dbz.zip" "animelee_dbz.xdelta" "animelee_dbz.iso"
 					
 					elif [ "$Choice" == "Diet" ]; then
-						xdg-open https://diet.melee.tv/
+						apply_diet_patch "DietMeleeClassic.xdelta" "diet_melee_classic.iso"
+						
+					elif [ "$Choice" == "DietCrystal" ]; then
+						# xdelta complains: "xdelta3: unavailable secondary compressor: LZMA: XD3_INTERNAL", not sure what to do about this at the moment
+						apply_diet_patch "crystaldiff.xdelta" "diet_melee_crystal.iso"
+						
+					elif [ "$Choice" == "Diet64" ]; then
+						apply_diet_patch "64diff.xdelta" "diet_melee_64.iso"
 					
 					elif [ "$Choice" == "Akaneia" ]; then
 						if ! [ -f $melee_ROM ]; then
 							error "SSBM not found. Please name it to ssbm.iso and put it in $HOME/Emulation/roms/gamecube/."
 						else
-							# check if user has xdelta3, if not download it
-							if ! [ -f $HOME/Applications/xdelta3/xdelta3 ]; then
-								echo -e "Downloading xdelta3...\n"
-								mkdir -p $HOME/Applications/xdelta3
-								curl -L https://linuxgamingcentral.com/files/xdelta3 -o $HOME/Applications/xdelta3/xdelta3
-								chmod +x $HOME/Applications/xdelta3/xdelta3
-							fi
+							check_if_xdelta_exists
 							
 							# download the patch and patch the ISO
 							# progress bar doesn't seem to work here, just have to use terminal text for now
@@ -411,7 +463,7 @@ Choice=$(main_menu)
 							rm -rf Akaneia\ Builder
 							rm akaneia.7z
 							
-							info "Akaneia added to $HOME/Emulation/roms/gamecube/akaneia.iso!"
+							info "Akaneia added to $HOME/Emulation/roms/gamecube/!"
 						fi
 						
 					elif [ "$Choice" == "Other" ]; then
@@ -577,7 +629,7 @@ Choice=$(main_menu)
 				echo "# Copying HDR to Yuzu..."
 				
 				# need to copy HDR files to a different place on Deck with Yuzu, since the default sdmc location is different...
-				if [ $USER == "deck" ]; then
+				if [ $USER == "deck" ] || [ $USER == "gamer" ]; then
 					cp -r HDR/sdcard/atmosphere $HOME/Emulation/storage/yuzu/sdmc/
 					cp -r HDR/sdcard/ultimate $HOME/Emulation/storage/yuzu/sdmc/
 				else
@@ -614,13 +666,13 @@ Choice=$(main_menu)
 				fi
 			
 			elif [ "$Choice" == "Fixes_Yuzu" ]; then
-				if ! [ -d $HOME/Emulation/storage/yuzu/sdmc/ultimate/arcropolis ]; then
+				if ! [ -d $HOME/Emulation/storage/yuzu/sdmc/ultimate/arcropolis ] && ! [ -d $HOME/.local/share/yuzu/sdmc/ultimate/arcropolis ]; then
 					error "ARCropolis folder not found for Yuzu, you need to run Smash Ultimate at least once in order to apply the fixes."
 				else
 					hdr_patches #download and extract patches
 					
-					# copy the files to the default sdmc location on Deck
-					if [ $USER == "deck" ]; then
+					# copy the files to the default sdmc location on Deck/ChimeraOS
+					if [ $USER == "deck" ] || [ $USER == "gamer" ]; then
 						echo -e "Copying save data for Yuzu...\n"
 						cp -r HDR/save_data $HOME/Emulation/storage/yuzu/nand/user/save/0000000000000000/*/01006A800016E000/
 						sleep 1
@@ -699,6 +751,9 @@ Choice=$(main_menu)
 					sudo -Sp '' steamos-readonly disable <<<${sudo_password}
 					undo_overclock
 					sudo steamos-readonly enable
+				elif [ $USER == "gamer" ]; then
+					sudo -Sp '' frzr-unlock <<<${sudo_password}
+					undo_overclock
 				else
 					undo_overclock <<<${sudo_password}
 				fi
@@ -723,6 +778,14 @@ Choice=$(main_menu)
 
 				# Lock the filesystem back up
 				sudo steamos-readonly enable
+			elif [ $USER == "gamer" ]; then
+				# unlock FS
+				sudo -Sp '' frzr-unlock <<<${sudo_password}
+				
+				# Install kernel headers and dev tools
+				sudo pacman -S --needed --noconfirm base-devel "$(cat /usr/lib/modules/$(uname -r)/pkgbase)-headers"
+				
+				overclock				
 			else
 				overclock <<<${sudo_password}
 			fi
