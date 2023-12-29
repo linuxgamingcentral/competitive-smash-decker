@@ -21,7 +21,7 @@ That being said, there will still need to be a little bit of legwork needed on y
   - configure or play Project+
   - online multiplayer support via Lylat
 - [Project M EX Remix](https://linuxgamingcentral.com/posts/how-to-setup-project-m-ex-on-deck/)
-  - currently downloads and extracts 0.95 DX from my server
+  - manual download of PMEX Remix
   - configure and play Project+/PMEX Remix
 - [Smash Ultimate HDR](https://github.com/HDR-Development/HDR-Releases)
   - download the latest (stable) HDR patch and install them for both Ryujinx and Yuzu
@@ -72,7 +72,6 @@ Other distros can run the script with:
 ### Mod Uploads
 I have uploaded some mods (particularly those that are hosted on Mediafire and Google Drive) to my server. In particular:
 - Animelee and Diet Melee patches
-- PMEX Remix (0.95 DX). I have stripped all of the unnecessary files from the download away and have only included the launcher .elf files, the changelog, and the sd.raw file
 - HDR 100% save data, legacy discovery, and the Wi-Fi fix
 
 This makes it easier to download these mods through the script. The downloads can now be handled automatically versus having to manually download them yourself. If any developer has a problem with this, they're more than welcome to shoot me an [email](mailto:contact@linuxgamingcentral.com) or file an issue and I will gladly take the mod down.
@@ -91,6 +90,8 @@ In regards to Diet Melee, **only the classic edition patch for Diet Melee curren
 You *may* need to set the graphics backend to Vulkan if all you get is a white screen when launching either mod.
 
 As with Slippi, **don't use HD textures**; it will cause the emulator to crash if pre-fetching is enabled.
+
+If you're planning on playing PMEX Remix, you'll need to download it manually for now until I can figure out a way to download the latest release through the script.
 
 ### Lylat
 Lylat adds online multiplayer to Akaneia (Melee) and Project+. There are separate builds for each that are downloaded into `~/Applications/Lylat/` as an AppImage. You will need to create a [Lylat account](https://lylat.gg/). Once you've started Lylat with Akaneia, you will be asked to login. Save the `lylat.json` file to `~/.config/SlippiOnline/`.

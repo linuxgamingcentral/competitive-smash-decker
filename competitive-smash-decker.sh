@@ -121,7 +121,7 @@ pmex_menu() {
 	--column ""\
 	--column "Option"\
 	--column="Description"\
-	FALSE Download "Download or update PMEX Remix"\
+	FALSE Download "Download or update PMEX Remix (your web browser will open)"\
 	FALSE Configure "Configure P+"\
 	FALSE Play "Launch PMEX Remix"\
 	TRUE Exit "Exit this submenu"
@@ -559,17 +559,7 @@ Choice=$(main_menu)
 			elif [ "$Choice" == "Download" ]; then
 				mkdir -p PMEX-Remix
 
-				# code to be executed here...
-				echo -e "Downloading...\n"
-				curl -L https://linuxgamingcentral.com/files/pmex.zip -o $HOME/Applications/PMEX-Remix/pmex.zip
-				
-				echo -e "Extracting...\n"
-				unzip -o $HOME/Applications/PMEX-Remix/pmex.zip -d $HOME/Applications/PMEX-Remix/
-				
-				echo -e "Cleaning up...\n"
-				rm $HOME/Applications/PMEX-Remix/pmex.zip
-				
-				info "PMEX Remix downloaded!"
+				xdg-open https://drive.google.com/drive/folders/1u6aENdnSyDio-CmpNRLg8NXxc8xoYfQh
 			
 			elif [ "$Choice" == "Configure" ]; then
 				if ! [ -f $project_plus ]; then
