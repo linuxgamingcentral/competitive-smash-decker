@@ -8,8 +8,7 @@ That being said, there will still need to be a little bit of legwork needed on y
 ## What Currently Works
 - [Smash 64 Remix](https://github.com/JSsixtyfour/smashremix)
   - download the latest patch and apply it to the ROM
-  - view changelog
-  - run Mupen64 GUI
+  - download the netplay build of Project64 (users will need to run the emulator via Wine or Steam with Proton)
 - [Slippi](https://github.com/project-slippi/slippi-launcher)
   - download/update/play Slippi Launcher
   - configure Dolphin settings without launcher
@@ -79,7 +78,12 @@ This makes it easier to download these mods through the script. The downloads ca
 ### Adding to Steam
 **Mods are downloaded to `~/Applications/`.** Smash 64 Remix and HDR can be added as non-Steam shortcuts with Steam ROM Manager -- included with EmuDeck. Slippi, Lylat, and Project+/PMEX Remix will need to be manually added to Steam at the moment.
 
-### Melee
+### Smash 64 Remix
+After adding Mupen GUI and Smash 64 as non-Steam shortcuts, you may want to configure some of the controls and video options with Mupen GUI. Launch Mupen GUI through Steam and configure from there.
+
+Project64 is Windows-only and as such will require you to add the emulator as a non-Steam shortcut, then force Steam to use Proton. Again, you may want to reconfigure your controls and the video options.
+
+### Slippi
 **The use of HD textures is discouraged.** The reason being is, Slippi does *not* support the pre-fetching of custom textures on Linux (the emulator will just crash as soon as the game is launched). Loading custom textures without pre-fetching them can make the game stutter-y.
 
 In regards to Diet Melee, **only the classic edition patch for Diet Melee currently works.** Trying to patch Crystal Melee or Diet 64 will just throw a xdelta3 error regarding a missing compressor.

@@ -6,12 +6,6 @@ echo -e "Competitive Smash Decker - script by Linux Gaming Central\n"
 
 title="Competitive Smash Decker"
 
-if [ $USER == "deck" ]; then
-	echo -e "User is using a Steam Deck.\n"
-elif [ $USER == "gamer" ]; then
-	echo -e "User is using ChimeraOS.\n"
-fi
-
 # Removes unhelpful GTK warnings
 zen_nospam() {
   zenity 2> >(grep -v 'Gtk' >&2) "$@"
@@ -69,8 +63,7 @@ smash64_remix_menu() {
 	--column "Option"\
 	--column="Description"\
 	FALSE Download "Download Smash 64 Remix patch and patch the ROM"\
-	FALSE Changelog "View patch notes"\
-	FALSE Play "Launch Mupen64"\
+	FALSE Netplay "Get Project64 for netplay"\
 	TRUE Exit "Exit this submenu"
 }
 
@@ -344,25 +337,24 @@ Choice=$(main_menu)
 					rm smashremix.zip
 				fi
 			
-			elif [ "$Choice" == "Changelog" ]; then
-				cd smashremix*/
+			elif [ "$Choice" == "Netplay" ]; then
+				info "This will download and extract the Project64 build designed specifically for netplay. Note that this is a Windows-only build.\nYou will need to run the emulator via Wine or Steam with Proton."
 				
-				if [ -f *\ Patch\ Notes.txt ]; then
-					mv *\ Patch\ Notes.txt patch_notes.txt
-				fi
+				mkdir -p $HOME/Applications/project64k-legacy
 				
-				text_info "Smash 64 Remix Patch Notes" "patch_notes.txt"
+				echo -e "Downloading Project64...\n"
+				sleep 1
+				curl -L $(curl -s https://api.github.com/repos/smash64-dev/project64k-legacy/releases/latest | grep "browser_download_url" | grep zip | cut -d '"' -f 4) -o project64k-legacy.zip
 				
-				cd $HOME/Applications
-			
-			elif [ "$Choice" == "Play" ]; then
-				# install the Mupen64 GUI flatpak if it isn't detected
-				if ! [ -d $HOME/.var/app/com.github.Rosalie241.RMG ]; then
-					error "Mupen64 not found. Please install it as a Flatpak and run it at least once."
-				else
-					# just run the emulator itself for now, can't figure out how to get the ROM to launch directly
-					flatpak run com.github.Rosalie241.RMG	
-				fi
+				echo -e "Extracting...\n"
+				sleep 1
+				unzip -o project64k-legacy.zip -d $HOME/Applications/project64k-legacy
+				
+				echo -e "Cleaning up...\n"
+				sleep 1
+				rm project64k-legacy.zip
+				
+				info "Project64 downloaded and extracted to $HOME/Applications/project64k-legacy.\nAdd Project64KSE.exe as a non-Steam shortcut, then force it to run Proton."
 			fi
 		done
 	
@@ -741,9 +733,6 @@ Choice=$(main_menu)
 					sudo -Sp '' steamos-readonly disable <<<${sudo_password}
 					undo_overclock
 					sudo steamos-readonly enable
-				elif [ $USER == "gamer" ]; then
-					sudo -Sp '' frzr-unlock <<<${sudo_password}
-					undo_overclock
 				else
 					undo_overclock <<<${sudo_password}
 				fi
@@ -767,15 +756,7 @@ Choice=$(main_menu)
 				overclock
 
 				# Lock the filesystem back up
-				sudo steamos-readonly enable
-			elif [ $USER == "gamer" ]; then
-				# unlock FS
-				sudo -Sp '' frzr-unlock <<<${sudo_password}
-				
-				# Install kernel headers and dev tools
-				sudo pacman -S --needed --noconfirm base-devel "$(cat /usr/lib/modules/$(uname -r)/pkgbase)-headers"
-				
-				overclock				
+				sudo steamos-readonly enable			
 			else
 				overclock <<<${sudo_password}
 			fi
